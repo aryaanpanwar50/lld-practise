@@ -1,0 +1,22 @@
+CREATE TYPE "AttemptStatus" AS ENUM ('DRAFT', 'SUBMITTED', 'EVALUATING', 'COMPLETED', 'FAILED');
+CREATE TABLE "users" ("id" UUID NOT NULL, "email" TEXT NOT NULL, "name" TEXT NOT NULL, "picture_url" TEXT, "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "users_pkey" PRIMARY KEY ("id"));
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+CREATE TABLE "problems" ("id" UUID NOT NULL DEFAULT gen_random_uuid(), "slug" TEXT NOT NULL, "title" TEXT NOT NULL, "description" TEXT NOT NULL, "difficulty" TEXT NOT NULL, "tags" TEXT[] NOT NULL, "requirements" TEXT[] NOT NULL, "constraints" TEXT[] NOT NULL, "checklist" TEXT[] NOT NULL, "rubric" JSONB NOT NULL, "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updated_at" TIMESTAMP(3) NOT NULL, CONSTRAINT "problems_pkey" PRIMARY KEY ("id"));
+CREATE UNIQUE INDEX "problems_slug_key" ON "problems"("slug");
+CREATE TABLE "attempts" ("id" UUID NOT NULL DEFAULT gen_random_uuid(), "user_id" UUID NOT NULL, "problem_id" UUID NOT NULL, "based_on_attempt_id" UUID, "status" "AttemptStatus" NOT NULL DEFAULT 'DRAFT', "format" TEXT NOT NULL DEFAULT 'structured-text', "submission" JSONB NOT NULL, "evaluation_started_at" TIMESTAMP(3), "evaluation_token" UUID, "failure_code" TEXT, "failure_message" TEXT, "submitted_at" TIMESTAMP(3), "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updated_at" TIMESTAMP(3) NOT NULL, CONSTRAINT "attempts_pkey" PRIMARY KEY ("id"));
+CREATE INDEX "attempts_user_id_problem_id_created_at_idx" ON "attempts"("user_id", "problem_id", "created_at");
+CREATE INDEX "attempts_status_evaluation_started_at_idx" ON "attempts"("status", "evaluation_started_at");
+CREATE TABLE "evaluation_results" ("attempt_id" UUID NOT NULL, "strengths" JSONB NOT NULL, "issues" JSONB NOT NULL, "suggestions" JSONB NOT NULL, "score_breakdown" JSONB, "total_score" INTEGER, "evaluated_by" TEXT[] NOT NULL, "evaluated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "evaluation_results_pkey" PRIMARY KEY ("attempt_id"));
+CREATE TABLE "discussions" ("id" UUID NOT NULL DEFAULT gen_random_uuid(), "attempt_id" UUID NOT NULL, "note" VARCHAR(1000), "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "discussions_pkey" PRIMARY KEY ("id"));
+CREATE UNIQUE INDEX "discussions_attempt_id_key" ON "discussions"("attempt_id");
+CREATE TABLE "comments" ("id" UUID NOT NULL DEFAULT gen_random_uuid(), "discussion_id" UUID NOT NULL, "author_id" UUID NOT NULL, "text" VARCHAR(1000) NOT NULL, "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "comments_pkey" PRIMARY KEY ("id"));
+CREATE INDEX "comments_discussion_id_created_at_idx" ON "comments"("discussion_id", "created_at");
+ALTER TABLE "attempts" ADD CONSTRAINT "attempts_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "attempts" ADD CONSTRAINT "attempts_problem_id_fkey" FOREIGN KEY ("problem_id") REFERENCES "problems"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "attempts" ADD CONSTRAINT "attempts_based_on_attempt_id_fkey" FOREIGN KEY ("based_on_attempt_id") REFERENCES "attempts"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "evaluation_results" ADD CONSTRAINT "evaluation_results_attempt_id_fkey" FOREIGN KEY ("attempt_id") REFERENCES "attempts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "discussions" ADD CONSTRAINT "discussions_attempt_id_fkey" FOREIGN KEY ("attempt_id") REFERENCES "attempts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "comments" ADD CONSTRAINT "comments_discussion_id_fkey" FOREIGN KEY ("discussion_id") REFERENCES "discussions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "comments" ADD CONSTRAINT "comments_author_id_fkey" FOREIGN KEY ("author_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+CREATE TABLE IF NOT EXISTS "TestRecord" ("id" TEXT NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "TestRecord_pkey" PRIMARY KEY ("id"));

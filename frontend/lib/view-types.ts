@@ -1,0 +1,9 @@
+export type FindingView={source:"rule-based"|"ai";severity:"major"|"minor"|"optional";code?:string;title:string;explanation:string;evidence:string};
+export type ScoreView={criterion:string;score:number;comment:string};
+export type EvaluationView={strengths:{title:string;detail:string}[];issues:FindingView[];suggestions:{title:string;detail:string}[];scoreBreakdown:ScoreView[]|null;totalScore:number|null};
+export type ClassView={name:string;kind:string;responsibilities:string[];attributes:string[];methods:string[]};
+export type RelationshipView={from:string;to:string;type:"association"|"aggregation"|"composition"|"inheritance"|"implementation"|"dependency";cardinality?:"one-to-one"|"one-to-many"|"many-to-one"|"many-to-many";note?:string;fromIndex?:number;toIndex?:number;fromSide?:"top"|"right"|"bottom"|"left";toSide?:"top"|"right"|"bottom"|"left"};
+export type SubmissionView={classes:ClassView[];relationships:RelationshipView[];designNotes:string;files?:{path:string;purpose:string;content?:string;classes?:number[]}[];folders?:{path:string;classes?:number[]}[];layout?:{x:number;y:number}[]};
+export type AttemptPageView={id:string;problemId:string;status:"DRAFT"|"SUBMITTED"|"EVALUATING"|"COMPLETED"|"FAILED";createdAt:string;submittedAt:string|null;evaluationStartedAt:string|null;failureMessage:string|null;problem:{id:string;title:string;slug:string};evaluationResult:EvaluationView|null;submission:SubmissionView};
+export type DiscussionListView={id:string;note:string|null;createdAt:string;_count:{comments:number};attempt:{problem:{title:string;slug:string};user:{name:string}}};
+export type DiscussionViewData={id:string;note:string|null;attempt:{submission:SubmissionView;problem:{title:string};user:{name:string}};comments:{id:string;text:string;author:{name:string}}[]};

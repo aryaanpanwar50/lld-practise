@@ -1,0 +1,2 @@
+import {currentUser,errorJson,routeUuid} from "../../../../../lib/platform";import {evaluateAttempt} from "../../../../../../backend/services/attempt-service";
+export async function POST(_:Request,{params}:{params:Promise<{id:string}>}){try{const user=await currentUser(),{id:rawId}=await params,id=routeUuid(rawId,"ATTEMPT_NOT_FOUND","Attempt");return Response.json({attempt:await evaluateAttempt(user.id,id)})}catch(e){return errorJson(e)}}

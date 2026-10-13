@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AttemptStatus {
+  DRAFT
+  SUBMITTED
+  EVALUATING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id        String    @id @db.Uuid
+  email     String    @unique
+  googleSub String?   @unique @map("google_sub")
+  name      String
+  pictureUrl String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  attempts  Attempt[]
+  drafts    Draft[]
+  comments  Comment[]
+  @@map("users")
+}
+
+model Problem {
+  id           String    @id @default(uuid()) @db.Uuid
+  slug         String    @unique
+  title        String
+  description  String    @db.Text
+  difficulty   String
+  tags         String[]
+  requirements String[]
+  constraints  String[]
+  checklist    String[]
+  rubric       Json
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  attempts     Attempt[]
+  drafts       Draft[]
+  @@map("problems")
+}
+
+model Attempt {
+  id                  String      @id @default(uuid()) @db.Uuid
+  userId              String      @db.Uuid @map("user_id")
+  problemId           String      @db.Uuid @map("problem_id")
+  basedOnAttemptId    String?     @db.Uuid @map("based_on_attempt_id")
+  status              AttemptStatus @default(DRAFT)
+  format              String      @default("structured-text")
+  submission          Json
+  evaluationStartedAt DateTime?   @map("evaluation_started_at")
+  evaluationToken     String?     @db.Uuid @map("evaluation_token")
+  failureCode         String?     @map("failure_code")
+  failureMessage      String?     @db.Text @map("failure_message")
+  submittedAt         DateTime?   @map("submitted_at")
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem             Problem     @relation(fields: [problemId], references: [id], onDelete: Restrict)
+  basedOn             Attempt?    @relation("AttemptRetry", fields: [basedOnAttemptId], references: [id], onDelete: SetNull)
+  retries             Attempt[]   @relation("AttemptRetry")
+  evaluationResult    EvaluationResult?
+  discussion          Discussion?
+  @@index([userId, problemId, createdAt])
+  @@index([status, evaluationStartedAt])
+  @@map("attempts")
+}
+
+model Draft {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @db.Uuid @map("user_id")
+  problemId        String   @db.Uuid @map("problem_id")
+  basedOnAttemptId String?  @db.Uuid @map("based_on_attempt_id")
+  draftKey         String   @default("active") @map("draft_key")
+  submission       Json
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem          Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId, draftKey], map: "drafts_one_per_user_problem_key")
+  @@index([userId, updatedAt])
+  @@map("drafts")
+}
+
+model EvaluationResult {
+  attemptId      String   @id @db.Uuid @map("attempt_id")
+  strengths      Json
+  issues         Json
+  suggestions    Json
+  scoreBreakdown Json?
+  totalScore     Int?     @map("total_score")
+  evaluatedBy    String[] @map("evaluated_by")
+  evaluatedAt    DateTime @default(now()) @map("evaluated_at")
+  attempt        Attempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  @@map("evaluation_results")
+}
+
+model Discussion {
+  id        String    @id @default(uuid()) @db.Uuid
+  attemptId String    @unique @db.Uuid @map("attempt_id")
+  note      String?   @db.VarChar(1000)
+  createdAt DateTime  @default(now()) @map("created_at")
+  attempt   Attempt   @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  @@map("discussions")
+}
+
+model Comment {
+  id           String     @id @default(uuid()) @db.Uuid
+  discussionId String     @db.Uuid @map("discussion_id")
+  authorId     String     @db.Uuid @map("author_id")
+  text         String     @db.VarChar(1000)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  discussion   Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  author       User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  @@index([discussionId, createdAt])
+  @@map("comments")
+}
+
+model TestRecord {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+}

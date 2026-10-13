@@ -1,0 +1,36 @@
+{
+  "name": "lld-practice-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon --watch . --watch ../.env --ext ts,env --ignore generated --exec tsx server.ts",
+    "start": "tsx server.ts",
+    "typecheck": "prisma generate --config prisma.config.ts && tsc --noEmit",
+    "db:generate": "prisma generate --config prisma.config.ts",
+    "db:migrate": "prisma migrate dev --config prisma.config.ts",
+    "db:deploy": "prisma migrate deploy --config prisma.config.ts",
+    "db:push": "prisma db push --config prisma.config.ts",
+    "db:studio": "prisma studio --config prisma.config.ts",
+    "db:seed": "tsx prisma/seed.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "dotenv": "^17.2.2",
+    "pg": "^8.16.3",
+    "tsx": "^4.20.6",
+    "zod": "^4.1.12",
+    "@langchain/core": "^1.2.17",
+    "@langchain/google": "^0.2.10"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.16",
+    "@types/pg": "^8.15.5",
+    "prisma": "7.10.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4",
+    "nodemon": "^3.1.10"
+  }
+}

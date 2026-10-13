@@ -1,0 +1,10 @@
+export type DesignClass = {name:string;kind:string;responsibilities:string[];attributes:string[];methods:string[]};
+export type Side = "top" | "right" | "bottom" | "left";
+export type RelationshipType = "association" | "aggregation" | "composition" | "inheritance" | "implementation" | "dependency";
+export type Cardinality = "one-to-one" | "one-to-many" | "many-to-one" | "many-to-many";
+export type Relationship = {from:string;to:string;type:RelationshipType;cardinality?:Cardinality;note?:string;fromIndex?:number;toIndex?:number;fromSide?:Side;toSide?:Side};
+export type FileEntry = {path:string;purpose:string;content?:string;classes?:number[]};
+export type FolderEntry = {path:string;classes?:number[]};
+export type Point = {x:number;y:number};
+export type DesignState = {classes:DesignClass[];relationships:Relationship[];designNotes:string;files:FileEntry[];folders:FolderEntry[];layout:Point[]};
+export const relationshipTypes:RelationshipType[]=["association","aggregation","composition","inheritance","implementation","dependency"];

@@ -1,0 +1,19 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+coverage/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Prisma generated client
+/backend/generated/prisma/
+
+# TypeScript and tooling
+*.tsbuildinfo
+next-env.d.ts
+.eslintcache

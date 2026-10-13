@@ -1,0 +1,1 @@
+import {Navigation} from "../../../../components/Navigation";import {AttemptEditor} from "../../../../components/AttemptEditor";export default async function EditDraft({params}:{params:Promise<{id:string}>}){const {id}=await params;return <><Navigation/><AttemptEditor draftId={id}/></>}

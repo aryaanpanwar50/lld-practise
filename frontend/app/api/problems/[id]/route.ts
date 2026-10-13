@@ -1,0 +1,2 @@
+import {db,ApiError,errorJson,problemLookupWhere} from "../../../../lib/platform";
+export async function GET(_:Request,{params}:{params:Promise<{id:string}>}){try{const {id}=await params,p=await db(),problem=await p.problem.findFirst({where:problemLookupWhere(id)});if(!problem)throw new ApiError(404,"PROBLEM_NOT_FOUND","Problem not found.");return Response.json({problem})}catch(e){return errorJson(e)}}

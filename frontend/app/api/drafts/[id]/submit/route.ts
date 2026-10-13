@@ -1,0 +1,2 @@
+import {currentUser,errorJson,jsonBody,parseBody,draftSchema,routeUuid} from "../../../../../lib/platform";import {submitAttempt} from "../../../../../../backend/services/attempt-service";
+export async function POST(req:Request,{params}:{params:Promise<{id:string}>}){try{const user=await currentUser(),{id:rawId}=await params,id=routeUuid(rawId,"DRAFT_NOT_FOUND","Draft"),input=parseBody(draftSchema,await jsonBody(req));return Response.json({attempt:await submitAttempt(user.id,id,input.submission)})}catch(e){return errorJson(e)}}
